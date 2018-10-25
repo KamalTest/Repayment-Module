@@ -1,0 +1,75 @@
+public class EMIDeciderHandler {
+    public Decimal installment=0.0;
+    public Decimal balanceAmount=0.0;
+    public Decimal revisedLoanAmount=0.0;
+    public Decimal revisedInstallment=0.00;
+    public Decimal revisedInstallment=0.0;
+    public Integer revisedTerms=0;
+    public void calEmi(Decimal loanAmount,Decimal salary,Integer terms,String freq,Decimal expenditure,Decimal Interest,String ProductType){
+        Decimal ler=([select id,LER__c from scorecard__c limit 1]).LER__c;
+        if(freq=='Weekly'){           
+            expenditure=expenditure/7;
+            salary=salary/7;
+        }
+        installment=calEmiAmount(loanAmount,terms,interest,ProductType);        
+        system.debug(installment);
+        balanceAmount=salary-expenditure;        
+        if(balanceAmount/installment>=ler){
+            if(productType=='Fixed'){
+                genFlatAmort(terms,'Flat',installment,Interest,loanAmount);
+            }
+            else
+            genVerAmort(terms,freq,installment,Interest,loanAmount);
+        }
+        else{
+            revisedLoanAmount=(salary-expenditure)/(ler);
+            system.debug(revisedLoanAmount);
+            Decimal emi=balanceAmount/ler;
+            SYSTEM.debug(emi/terms);
+            revisedTerms=Integer.valueOf(loanAmount/emi);            
+            system.debug(revisedLoanAmount);
+            if(productType=='Fixed'){
+            genFlatAmort(terms,'Flat',EMI,Interest,loanAmount);
+            }
+            else
+            genVerAmort(terms,freq,EMI,Interest,loanAmount);
+        }        
+        revisedInstallment=revisedLoanAmount;
+        system.debug(revisedInstallment);
+        system.debug(revisedTerms+1);        
+    }
+    public void genFlatAmort(Integer term,String freq,Decimal emiAmount, Decimal interest,Decimal loanAmount){
+        Decimal balance;
+        Decimal intAmount=emiAmount*interest/100;
+        Decimal prinBal;
+        Date fromDate;        
+        for(Integer i=0;i<term;i++){ 
+            system.debug('From Date: '+ String.valueOf(Date.today().addDays(i*7)) +' to Week: '+ String.valueOf(Date.today().adddays((i+1)*7))+' Interest amount: '+intAmount+' Principal amount: '+ String.valueOf(emiAmount-intAMount)+' Balance amount: '+ String.valueOf(loanAmount-(i+1)*emiAmount));
+        }    
+    }
+    public void genVerAmort(Integer term,String freq,Decimal emiAmount, Decimal interest,Decimal loanAmount){
+        Decimal balance;
+        Decimal intAmount;
+        Decimal prinBal;
+        Date fromDate;        
+        for(Integer i=0;i<term;i++){ 
+            if(freq=='Weekly')
+                intAmount=loanAmount*interest*7/36500;
+            //system.debug(intAmount);
+            system.debug('From Date: '+ String.valueOf(Date.today().addDays(i*7)) +' to Week: '+ String.valueOf(Date.today().adddays((i+1)*7))+'Payment is: '+String.valueOf(EmiAmount)+' Interest amount: '+intAmount+' Principal amount: '+ String.valueOf(emiAmount-intAMount)+' Balance amount: '+ String.valueOf(loanAmount-(emiAmount-intAMount)));
+            loanAmount=loanAMount-(emiAmount-intAmount);            
+        }      
+    }
+    public Decimal calEmiAmount(Decimal loanAmount,Integer term,Decimal interest,String ProdType){
+        decimal fac;
+        decimal emi;
+        if(ProdType=='Variable'){       
+         fac=((1+(interest*7)/36500).pow(term)-1)/((interest*7/36500*(1+(interest*7)/36500).pow(term)));
+            emi=loanAmount/fac;
+        }
+        else{
+            emi=loanAmount/term+loanAmount*interest*7/36500;
+            }
+        return emi;
+    }
+}
