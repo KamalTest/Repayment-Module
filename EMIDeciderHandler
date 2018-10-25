@@ -4,6 +4,7 @@ public class EMIDeciderHandler {
     public Decimal revisedLoanAmount=0.0;
     public Decimal revisedInstallment=0.0;
     public Integer revisedTerms=0;
+//test
     public void calEmi(Decimal loanAmount,Decimal salary,Integer terms,String freq,Decimal expenditure,Decimal Interest,String ProductType){
         Decimal ler=([select id,LER__c from scorecard__c limit 1]).LER__c;
         if(freq=='Weekly'){           
